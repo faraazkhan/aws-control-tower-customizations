@@ -255,7 +255,7 @@ Resources:
       Code:
         S3:
           Bucket: cms-cloud-custom-control-tower-us-east-1
-          Key: !Sub customizations-for-aws-control-tower/2.0.0-cms/custom-control-tower-configuration-${AWS::Region}.zip
+          Key: !Sub customizations-for-aws-control-tower/2.0.0-cms/custom-control-tower-configuration.zip
 
  # SSM Parameter to store the git repository name
   CustomControlTowerRepoNameParameter:
@@ -947,7 +947,7 @@ Resources:
           LOG_LEVEL: !FindInMap [LambdaFunction, Logging, Level]
           SOLUTION_ID: !FindInMap [Solution, Metrics, SolutionID]
       Code:
-        S3Bucket: !Sub "cms-cloud-custom-control-tower-us-east-1-${AWS::Region}"
+        S3Bucket: "cms-cloud-custom-control-tower-us-east-1"
         S3Key: customizations-for-aws-control-tower/2.0.0-cms/custom-control-tower-config-deployer.zip
       FunctionName: CustomControlTowerDeploymentLambda
       Description: Custom Control Tower Deployment Lambda
@@ -1215,7 +1215,7 @@ Resources:
           MAX_CONCURRENT_PERCENT: !FindInMap [CloudFormationDeploymentOptions, Percentage, MaximumConcurrentAccounts]
           FAILED_TOLERANCE_PERCENT: !FindInMap [CloudFormationDeploymentOptions, Percentage, FailureTolerance]
       Code:
-        S3Bucket: !Sub "cms-cloud-custom-control-tower-us-east-1-${AWS::Region}"
+        S3Bucket: "cms-cloud-custom-control-tower-us-east-1"
         S3Key: customizations-for-aws-control-tower/2.0.0-cms/custom-control-tower-state-machine.zip
       FunctionName: CustomControlTowerStateMachineLambda
       Description: Custom Control Tower State Machine Handler
@@ -2825,7 +2825,7 @@ Resources:
           LOG_LEVEL: !FindInMap [LambdaFunction, Logging, Level]
           CODE_PIPELINE_NAME: !Ref CustomControlTowerCodePipeline
       Code:
-        S3Bucket: !Sub "cms-cloud-custom-control-tower-us-east-1-${AWS::Region}"
+        S3Bucket: "cms-cloud-custom-control-tower-us-east-1"
         S3Key: customizations-for-aws-control-tower/2.0.0-cms/custom-control-tower-lifecycle-event-handler.zip
       Description: Custom Control Tower Lifecyle event Lambda to handle lifecycle events
       Handler: lifecycle_event_handler.lambda_handler
