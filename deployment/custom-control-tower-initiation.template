@@ -2970,6 +2970,39 @@ Resources:
           SqsParameters:
             MessageGroupId: CustomControlTower_Lifecycle_Event
 
+  # Cloudwatch Event Rule for Lifecycle Event (LE): triggered by LE events and send events to SQS
+  CustomControlTowerLEUpdateCWEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Custom Control Tower - Rule for lifecycle events from Control Tower Service
+      EventPattern:
+        {
+          "detail-type": [
+            "AWS Service Event via CloudTrail"
+          ],
+          "source": [
+              "aws.controltower"
+          ],
+          "detail": {
+              "eventName": [
+                  "UpdateManagedAccount"
+              ],
+              "serviceEventDetails": {
+                "updateManagedAccountStatus": {
+                  "state": [
+                    "SUCCEEDED"
+                  ]
+                }
+              }
+          }
+        }
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt CustomControlTowerLEFIFOQueue.Arn
+          Id: "CustomControlTower_Lifecycle_Event_FIFO_Queue"
+          SqsParameters:
+            MessageGroupId: CustomControlTower_Lifecycle_Event
+
   # Lifecycle event SQS Policy
   CustomControlTowerLEQueuePolicy:
     Type: AWS::SQS::QueuePolicy
