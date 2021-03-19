@@ -2880,6 +2880,30 @@ Resources:
         deadLetterTargetArn: !GetAtt CustomControlTowerLEFIFODLQueue.Arn
         maxReceiveCount: 5
 
+  # FIFO SQS Queue for storing Lifecycle Events (LE) for GSS Function
+  CMSCloudGSSAccountAssociationQueue:
+    Type: "AWS::SQS::Queue"
+    DependsOn: CustomControlTowerDeploymentLambda
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W28
+            reason: "The queue name is defined in order not to exceed the limit on the length of SQS queue name."
+    Properties:
+      QueueName: CMSCloudGSSAccountAssociationQueue.fifo
+      ContentBasedDeduplication: True
+      FifoQueue: True
+      KmsDataKeyReusePeriodSeconds: 300
+      KmsMasterKeyId: !Sub
+        - alias/${KMSKeyName}
+        - {KMSKeyName: !FindInMap [KMS, Alias, Name]}
+      MessageRetentionPeriod: 345600  #345600 seconds (4 days)
+      ReceiveMessageWaitTimeSeconds: 20
+      VisibilityTimeout: 30  #30 seconds
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt CustomControlTowerLEFIFODLQueue.Arn
+        maxReceiveCount: 5
+
   # Create event source mapping between the lifecycle event FIFO queue and lambda function to make the queue as the lambda trigger
   CustomControlTowerLEQueueLambdaEventMapping:
     Type: AWS::Lambda::EventSourceMapping
@@ -2969,6 +2993,10 @@ Resources:
           Id: "CustomControlTower_Lifecycle_Event_FIFO_Queue"
           SqsParameters:
             MessageGroupId: CustomControlTower_Lifecycle_Event
+        - Arn: !GetAtt CMSCloudGSSAccountAssociationQueue.Arn
+          Id: "CMSCloud_GSS_Account_Association_Queue"
+          SqsParameters:
+            MessageGroupId: CustomControlTower_Lifecycle_Event
 
   # Cloudwatch Event Rule for Lifecycle Event (LE): triggered by LE events and send events to SQS
   CustomControlTowerLEUpdateCWEventRule:
@@ -3000,6 +3028,10 @@ Resources:
       Targets:
         - Arn: !GetAtt CustomControlTowerLEFIFOQueue.Arn
           Id: "CustomControlTower_Lifecycle_Event_FIFO_Queue"
+          SqsParameters:
+            MessageGroupId: CustomControlTower_Lifecycle_Event
+        - Arn: !GetAtt CMSCloudGSSAccountAssociationQueue.Arn
+          Id: "CMSCloud_GSS_Account_Association_Queue"
           SqsParameters:
             MessageGroupId: CustomControlTower_Lifecycle_Event
 
